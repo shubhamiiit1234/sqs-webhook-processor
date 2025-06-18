@@ -34,18 +34,6 @@ func main() {
 	if err := produceMsg(messageBody2); err != nil {
 		os.Exit(1)
 	}
-
-	messageBody3 := `{
-						"webhook_id":"11111",
-						"event":"payment_success",
-						"data":{
-								"amount":250
-								}
-					}`
-
-	if err := produceMsg(messageBody3); err != nil {
-		os.Exit(1)
-	}
 }
 
 func produceMsg(messageBody string) error {
