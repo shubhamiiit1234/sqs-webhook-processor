@@ -17,7 +17,7 @@ type Webhook struct {
 	Event     string `json:"event"`
 }
 
-func processWebhook(msg string) error {
+func processWebhook(msg string, counter int) error {
 	var webhook Webhook
 	if err := json.Unmarshal([]byte(msg), &webhook); err != nil {
 		return err
@@ -26,7 +26,12 @@ func processWebhook(msg string) error {
 	fmt.Println("Processing webhook:", webhook)
 
 	// Simulate failure randomly
-	if rand.Intn(3) == 0 {
+	// if rand.Intn(3) == 0 {
+	// 	return fmt.Errorf("simulated failure")
+	// }
+
+	if counter < 2 {
+		counter++
 		return fmt.Errorf("simulated failure")
 	}
 
@@ -43,6 +48,8 @@ func main() {
 
 	sqsClient := sqs.New(sess)
 	rand.Seed(time.Now().UnixNano())
+
+	counter := 0
 
 	for {
 		output, err := sqsClient.ReceiveMessage(&sqs.ReceiveMessageInput{
@@ -64,7 +71,7 @@ func main() {
 		for _, msg := range output.Messages {
 			fmt.Println("Received message:", *msg.Body)
 
-			if err := processWebhook(*msg.Body); err != nil {
+			if err := processWebhook(*msg.Body, counter); err != nil {
 				fmt.Println("Failed to process:", err)
 				// Don’t delete — it will retry and go to DLQ eventually
 				continue
